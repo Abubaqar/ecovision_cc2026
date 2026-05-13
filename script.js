@@ -6,9 +6,19 @@ let selected = 1;
 
 let pulse = 0;
 
+let logo;
+
+let evSound;
+let petrolSound;
+let hybridSound;
+
+let animatedPositions = [];
+let animatedScales = [];
+
 function preload() {
 
   bg = loadImage('assets/background.png');
+  logo = loadImage('assets/logo.png');
 
   vehicles[0] = loadImage('assets/petrol.png');
   vehicles[1] = loadImage('assets/ev.png');
@@ -19,6 +29,14 @@ function preload() {
 function setup() {
 
   createCanvas(windowWidth, windowHeight);
+
+  animatedPositions = [
+  width/2 - 500,
+  width/2,
+  width/2 + 500
+];
+
+animatedScales = [0.72, 1.02, 0.72];
 
   imageMode(CENTER);
   rectMode(CENTER);
@@ -36,8 +54,6 @@ function draw() {
   drawTitle();
 
   drawCars();
-
-  drawHUD();
 
   drawBottomBar();
 
@@ -61,26 +77,36 @@ function drawOverlay() {
 
 function drawTitle() {
 
+  image(
+    logo,
+    width/2,
+    110,
+    500,
+    500
+  );
+
+
   textAlign(CENTER);
 
   fill(255);
 
-  textSize(72);
-  text('ECOVISION', width/2, 130);
-
-  fill(120);
-
   textSize(24);
-  text('Future Mobility Experience', width/2, 180);
 
-  fill(200);
+  text(
+    'Future Mobility Experience',
+    width/2,
+    190
+  );
 
-  textSize(20);
+
+  fill(170);
+
+  textSize(18);
 
   text(
     'Explore. Compare. Understand.',
     width/2,
-    240
+    230
   );
 
 
@@ -94,53 +120,57 @@ function drawButton() {
 
   fill(0, 120);
 
-  rect(width/2, 330, 320, 70, 12);
+  rect(width/2, 280,320,70,12);
 
   fill(0, 255, 255);
 
   noStroke();
 
+  textAlign(CENTER);
+
   textSize(24);
 
-  text('START EXPERIENCE', width/2, 338);
+  text(
+    'START EXPERIENCE',
+    width/2,
+    287
+  );
 }
 
 
 function drawCars() {
 
   let targetPositions = [
-    width/2 - 520,
+    width/2 - 500,
     width/2,
-    width/2 + 520
+    width/2 + 500
   ];
 
-
-  // Selected car moves slightly center-focused
 
   if(selected === 0) {
 
     targetPositions = [
-      width/2 - 280,
-      width/2 + 180,
-      width/2 + 620
+      width/2 - 260,
+      width/2 + 220,
+      width/2 + 650
     ];
   }
 
   if(selected === 1) {
 
     targetPositions = [
-      width/2 - 520,
+      width/2 - 500,
       width/2,
-      width/2 + 520
+      width/2 + 500
     ];
   }
 
   if(selected === 2) {
 
     targetPositions = [
-      width/2 - 620,
-      width/2 - 180,
-      width/2 + 280
+      width/2 - 650,
+      width/2 - 220,
+      width/2 + 260
     ];
   }
 
@@ -149,36 +179,39 @@ function drawCars() {
 
     let active = selected === i;
 
-    let scaleValue = active ? 1.18 : 0.82;
-
-    let img = vehicles[i];
-
-let baseWidth = 620 * scaleValue;
-
-let aspectRatio = img.height / img.width;
-
-let calculatedHeight = baseWidth * aspectRatio;
-
-image(
-  img,
-  targetPositions[i],
-  height/2 + 130,
-  baseWidth,
-  calculatedHeight
-);
+    let targetScale = active ? 1.02 : 0.72;
 
 
-    drawGlowRing(
+    animatedPositions[i] = lerp(
+      animatedPositions[i],
       targetPositions[i],
-      height/2 + 270,
-      active
+      0.08
     );
 
 
-    if(active) {
+    animatedScales[i] = lerp(
+      animatedScales[i],
+      targetScale,
+      0.08
+    );
 
-      drawVehicleCard(i, targetPositions[i]);
-    }
+
+    let img = vehicles[i];
+
+    let baseWidth = 520 * animatedScales[i];
+
+    let aspectRatio = img.height / img.width;
+
+    let calculatedHeight = baseWidth * aspectRatio;
+
+
+    image(
+      img,
+      animatedPositions[i],
+      height/2 + 120,
+      baseWidth,
+      calculatedHeight
+    );
   }
 }
 
@@ -208,164 +241,128 @@ function drawGlowRing(x, y, active) {
 }
 
 
-function drawVehicleCard(i, x) {
 
-  let names = [
+
+function drawTopRightHUD() {
+
+  fill(0, 120);
+
+  stroke(0, 255, 255);
+
+  rect(width - 240, 170, 400, 150, 12);
+
+  noStroke();
+
+  fill(255);
+
+  textAlign(LEFT);
+
+  textSize(28);
+
+  text(
+    'MOBILITY OVERVIEW',
+    width - 410,
+    135
+  );
+
+
+  let labels = [
+    'Energy Efficiency',
+    'Environmental Impact',
+    'Charging Ecosystem'
+  ];
+
+
+  fill(160);
+
+  textSize(18);
+
+
+  for(let i = 0; i < labels.length; i++) {
+
+    text(
+      labels[i],
+      width - 410,
+      190 + i * 38
+    );
+  }
+}
+
+
+function drawBottomBar() {
+
+  fill(0, 220);
+
+  stroke(0, 255, 255, 120);
+
+  rect(width/2, height - 60, width - 100, 85, 12);
+
+  noStroke();
+
+  let items = [
     'PETROL',
     'ELECTRIC',
     'HYBRID'
   ];
 
 
-  let efficiency = [
-    'Efficiency 30%',
-    'Efficiency 90%',
-    'Efficiency 65%'
+  let desc = [
+    'Fast Refueling',
+    'High Efficiency',
+    'Balanced Mobility'
   ];
 
 
-  fill(0, 160);
-
-  stroke(0, 255, 255);
-
-  rect(x, height - 220, 290, 140, 12);
-
-  noStroke();
-
-  fill(255);
-
-  textSize(28);
-
-  text(
-    names[i],
-    x,
-    height - 250
-  );
-
-  fill(180);
-
-  textSize(18);
-
-  text(
-    efficiency[i],
-    x,
-    height - 190
-  );
-}
-
-
-function drawHUD() {
-
-  fill(0, 140);
-
-  stroke(0, 255, 255);
-
-  rect(180, 180, 260, 140, 12);
-
-  noStroke();
-
-  fill(255);
-
-  textAlign(LEFT);
-
-  textSize(26);
-
-  text(
-    '24°C',
-    90,
-    150
-  );
-
-  fill(0, 255, 120);
-
-  textSize(20);
-
-  text(
-    'CLEAN AIR INDEX',
-    90,
-    200
-  );
-
-  text(
-    '72 / 100',
-    90,
-    240
-  );
-
-
-  drawTopRightHUD();
-}
-
-
-function drawTopRightHUD() {
-
-  fill(0, 140);
-
-  stroke(0, 255, 255);
-
-  rect(width - 220, 160, 360, 120, 12);
-
-  noStroke();
-
-  fill(255);
-
-  textAlign(LEFT);
-
-  textSize(24);
-
-  text(
-    'THE FUTURE IS ELECTRIC',
-    width - 370,
-    150
-  );
-
-  fill(120);
-
-  textSize(18);
-
-  text(
-    'Sustainable. Smart. Limitless.',
-    width - 370,
-    200
-  );
-}
-
-
-function drawBottomBar() {
-
-  fill(0, 140);
-
-  stroke(0, 255, 255, 80);
-
-  rect(width/2, height - 60, width - 80, 80, 12);
-
-  noStroke();
-
-  let items = [
-    'LOWER EMISSIONS',
-    'ENERGY EFFICIENCY',
-    'COST EFFECTIVE',
-    'FUTURE READY'
+  let positions = [
+    width/2 - 350,
+    width/2,
+    width/2 + 350
   ];
 
 
-  fill(0, 255, 255);
+  for(let i = 0; i < 3; i++) {
 
-  textAlign(CENTER);
+    let active = selected === i;
 
-  textSize(18);
+    fill(active ? '#00FFFF' : 160);
 
+    textAlign(CENTER);
 
-  for(let i = 0; i < items.length; i++) {
+    textSize(active ? 24 : 20);
 
     text(
       items[i],
-      220 + i * 320,
-      height - 50
+      positions[i],
+      height - 70
+    );
+
+
+    fill(active ? 255 : 110);
+
+    textSize(15);
+
+    text(
+      desc[i],
+      positions[i],
+      height - 38
     );
   }
 }
 
+function mousePressed() {
+
+  if(selected === 0) {
+    petrolSound.play();
+  }
+
+  if(selected === 1) {
+    evSound.play();
+  }
+
+  if(selected === 2) {
+    hybridSound.play();
+  }
+}
 
 function mouseMoved() {
 
