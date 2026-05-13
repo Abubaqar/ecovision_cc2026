@@ -1,218 +1,400 @@
-let currentPage = 'intro';
-let selectedVehicle = 'ev';
+let bg;
 
-const vehicles = {
-  ev: {
-    name: 'Electric',
-    color: '#00ffff',
-    cost: '₹2/km',
-    range: '450 km',
-    maintenance: 'Low',
-    impact: 'Minimal'
-  },
+let vehicles = [];
 
-  petrol: {
-    name: 'Petrol',
-    color: '#ff9d00',
-    cost: '₹8/km',
-    range: '700 km',
-    maintenance: 'Medium',
-    impact: 'High'
-  },
+let selected = 1;
 
-  diesel: {
-    name: 'Diesel',
-    color: '#9cff57',
-    cost: '₹6/km',
-    range: '900 km',
-    maintenance: 'Medium-High',
-    impact: 'Very High'
-  }
-};
+let pulse = 0;
+
+function preload() {
+
+  bg = loadImage('assets/background.png');
+
+  vehicles[0] = loadImage('assets/petrol.png');
+  vehicles[1] = loadImage('assets/ev.png');
+  vehicles[2] = loadImage('assets/hybrid.png');
+}
 
 
 function setup() {
+
   createCanvas(windowWidth, windowHeight);
+
+  imageMode(CENTER);
+  rectMode(CENTER);
 }
 
 
 function draw() {
-  background(10);
 
-  if(currentPage === 'intro') {
-    drawIntro();
-  }
+  background(0);
 
-  if(currentPage === 'showcase') {
-    drawShowcase();
-  }
-}
+  drawBackground();
 
+  drawOverlay();
 
-function drawIntro() {
+  drawTitle();
 
-  fill(255);
-  textAlign(CENTER, CENTER);
-
-  textSize(50);
-  text('EcoVision', width/2, height/2 - 100);
-
-  textSize(22);
-  fill(180);
-  text('Vehicle Compare Tool', width/2, height/2 - 50);
-
-  textSize(18);
-  fill(140);
-  text(
-    'Explore the future of Petrol, Diesel and Electric mobility.',
-    width/2,
-    height/2
-  );
-
-
-  fill(0,255,255);
-  rect(width/2 - 110, height/2 + 60, 220, 60, 12);
-
-  fill(0);
-  textSize(22);
-  text('Start Experience', width/2, height/2 + 90);
-}
-
-
-function drawShowcase() {
-
-  fill(255);
-  textSize(40);
-  textAlign(CENTER);
-  text('Mobility Systems', width/2, 70);
-
+  drawCars();
 
   drawHUD();
 
+  drawBottomBar();
 
-  drawVehicleCard(width/2 - 320, height/2, 'petrol');
-  drawVehicleCard(width/2, height/2, 'ev');
-  drawVehicleCard(width/2 + 320, height/2, 'diesel');
+  pulse += 0.03;
+}
+
+
+function drawBackground() {
+
+  image(bg, width/2, height/2, width, height);
+}
+
+
+function drawOverlay() {
+
+  fill(0, 160);
+  rect(width/2, height/2, width, height);
+}
+
+
+
+function drawTitle() {
+
+  textAlign(CENTER);
+
+  fill(255);
+
+  textSize(72);
+  text('ECOVISION', width/2, 130);
+
+  fill(120);
+
+  textSize(24);
+  text('Future Mobility Experience', width/2, 180);
+
+  fill(200);
+
+  textSize(20);
+
+  text(
+    'Explore. Compare. Understand.',
+    width/2,
+    240
+  );
+
+
+  drawButton();
+}
+
+
+function drawButton() {
+
+  stroke(0, 255, 255);
+
+  fill(0, 120);
+
+  rect(width/2, 330, 320, 70, 12);
+
+  fill(0, 255, 255);
+
+  noStroke();
+
+  textSize(24);
+
+  text('START EXPERIENCE', width/2, 338);
+}
+
+
+function drawCars() {
+
+  let targetPositions = [
+    width/2 - 520,
+    width/2,
+    width/2 + 520
+  ];
+
+
+  // Selected car moves slightly center-focused
+
+  if(selected === 0) {
+
+    targetPositions = [
+      width/2 - 280,
+      width/2 + 180,
+      width/2 + 620
+    ];
+  }
+
+  if(selected === 1) {
+
+    targetPositions = [
+      width/2 - 520,
+      width/2,
+      width/2 + 520
+    ];
+  }
+
+  if(selected === 2) {
+
+    targetPositions = [
+      width/2 - 620,
+      width/2 - 180,
+      width/2 + 280
+    ];
+  }
+
+
+  for(let i = 0; i < 3; i++) {
+
+    let active = selected === i;
+
+    let scaleValue = active ? 1.18 : 0.82;
+
+    let img = vehicles[i];
+
+let baseWidth = 620 * scaleValue;
+
+let aspectRatio = img.height / img.width;
+
+let calculatedHeight = baseWidth * aspectRatio;
+
+image(
+  img,
+  targetPositions[i],
+  height/2 + 130,
+  baseWidth,
+  calculatedHeight
+);
+
+
+    drawGlowRing(
+      targetPositions[i],
+      height/2 + 270,
+      active
+    );
+
+
+    if(active) {
+
+      drawVehicleCard(i, targetPositions[i]);
+    }
+  }
+}
+
+
+function drawGlowRing(x, y, active) {
+
+  noFill();
+
+  strokeWeight(active ? 4 : 2);
+
+  if(active) {
+
+    stroke(0, 255, 255, 180);
+
+  } else {
+
+    stroke(255, 255, 255, 30);
+  }
+
+
+  ellipse(
+    x,
+    y,
+    300 + sin(pulse) * 15,
+    90 + sin(pulse) * 5
+  );
+}
+
+
+function drawVehicleCard(i, x) {
+
+  let names = [
+    'PETROL',
+    'ELECTRIC',
+    'HYBRID'
+  ];
+
+
+  let efficiency = [
+    'Efficiency 30%',
+    'Efficiency 90%',
+    'Efficiency 65%'
+  ];
+
+
+  fill(0, 160);
+
+  stroke(0, 255, 255);
+
+  rect(x, height - 220, 290, 140, 12);
+
+  noStroke();
+
+  fill(255);
+
+  textSize(28);
+
+  text(
+    names[i],
+    x,
+    height - 250
+  );
+
+  fill(180);
+
+  textSize(18);
+
+  text(
+    efficiency[i],
+    x,
+    height - 190
+  );
 }
 
 
 function drawHUD() {
 
-  const vehicle = vehicles[selectedVehicle];
+  fill(0, 140);
 
-  fill(20);
-  stroke(vehicle.color);
-  strokeWeight(2);
+  stroke(0, 255, 255);
 
-  rect(50, 140, 320, 420, 18);
+  rect(180, 180, 260, 140, 12);
 
   noStroke();
 
-  fill(vehicle.color);
-  textSize(30);
+  fill(255);
+
   textAlign(LEFT);
 
-  text(vehicle.name, 80, 190);
+  textSize(26);
 
-  fill(180);
-  textSize(18);
+  text(
+    '24°C',
+    90,
+    150
+  );
 
-  text('Running Cost: ' + vehicle.cost, 80, 270);
-  text('Range: ' + vehicle.range, 80, 330);
-  text('Maintenance: ' + vehicle.maintenance, 80, 390);
-  text('Impact: ' + vehicle.impact, 80, 450);
+  fill(0, 255, 120);
+
+  textSize(20);
+
+  text(
+    'CLEAN AIR INDEX',
+    90,
+    200
+  );
+
+  text(
+    '72 / 100',
+    90,
+    240
+  );
+
+
+  drawTopRightHUD();
 }
 
 
-function drawVehicleCard(x, y, type) {
+function drawTopRightHUD() {
 
-  const vehicle = vehicles[type];
+  fill(0, 140);
 
-  let active = selectedVehicle === type;
+  stroke(0, 255, 255);
 
-  push();
+  rect(width - 220, 160, 360, 120, 12);
 
-  translate(x, y);
-
-  if(active) {
-    scale(1.08);
-  }
-
-  fill(active ? 25 : 40);
-
-  stroke(active ? vehicle.color : 80);
-  strokeWeight(active ? 3 : 1);
-
-  rect(-110, -180, 220, 360, 20);
-
-
-  fill(vehicle.color);
-  rect(-70, -110, 140, 70, 10);
-
+  noStroke();
 
   fill(255);
+
+  textAlign(LEFT);
+
+  textSize(24);
+
+  text(
+    'THE FUTURE IS ELECTRIC',
+    width - 370,
+    150
+  );
+
+  fill(120);
+
+  textSize(18);
+
+  text(
+    'Sustainable. Smart. Limitless.',
+    width - 370,
+    200
+  );
+}
+
+
+function drawBottomBar() {
+
+  fill(0, 140);
+
+  stroke(0, 255, 255, 80);
+
+  rect(width/2, height - 60, width - 80, 80, 12);
+
   noStroke();
+
+  let items = [
+    'LOWER EMISSIONS',
+    'ENERGY EFFICIENCY',
+    'COST EFFECTIVE',
+    'FUTURE READY'
+  ];
+
+
+  fill(0, 255, 255);
 
   textAlign(CENTER);
 
-  textSize(28);
-  text(vehicle.name, 0, 40);
-
-  fill(160);
-  textSize(15);
-
-  text('Hover to inspect vehicle', 0, 100);
-
-  pop();
-}
+  textSize(18);
 
 
-function mousePressed() {
+  for(let i = 0; i < items.length; i++) {
 
-  if(currentPage === 'intro') {
-
-    if(
-      mouseX > width/2 - 110 &&
-      mouseX < width/2 + 110 &&
-      mouseY > height/2 + 60 &&
-      mouseY < height/2 + 120
-    ) {
-      currentPage = 'showcase';
-    }
+    text(
+      items[i],
+      220 + i * 320,
+      height - 50
+    );
   }
 }
 
 
 function mouseMoved() {
 
-  if(currentPage !== 'showcase') return;
+  let positions = [
+    width/2 - 420,
+    width/2,
+    width/2 + 420
+  ];
 
 
-  if(isInside(width/2 - 320, height/2)) {
-    selectedVehicle = 'petrol';
+  for(let i = 0; i < 3; i++) {
+
+    if(
+
+      mouseX > positions[i] - 220 &&
+      mouseX < positions[i] + 220 &&
+
+      mouseY > height/2 - 50 &&
+      mouseY < height/2 + 280
+
+    ) {
+
+      selected = i;
+    }
   }
-
-  if(isInside(width/2, height/2)) {
-    selectedVehicle = 'ev';
-  }
-
-  if(isInside(width/2 + 320, height/2)) {
-    selectedVehicle = 'diesel';
-  }
-}
-
-
-function isInside(cardX, cardY) {
-
-  return (
-    mouseX > cardX - 110 &&
-    mouseX < cardX + 110 &&
-    mouseY > cardY - 180 &&
-    mouseY < cardY + 180
-  );
 }
 
 
 function windowResized() {
+
   resizeCanvas(windowWidth, windowHeight);
 }
